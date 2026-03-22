@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Gems Prompt Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .gem-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gem-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-notification {
+            transform: translateX(-50%) translateY(20px);
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .copy-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="text-slate-900 pb-20">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 py-10 px-6 mb-12">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="inline-flex items-center justify-center p-3 bg-blue-50 rounded-2xl mb-4">
+                <i data-lucide="sparkles" class="text-blue-600 w-8 h-8"></i>
+            </div>
+            <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl mb-4">Gemini Gems Library</h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+                Ready-to-use custom instructions to supercharge your Gemini experience. Click any Gem to view and copy
+                its prompt.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="gems-grid">
+            <!-- Cards will be injected here -->
+        </div>
+    </main>
+
+    <!-- Modal for viewing prompt -->
+    <div id="prompt-modal"
+        class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <div class="flex items-center gap-3">
+                    <div id="modal-icon-container" class="p-2 bg-white rounded-lg shadow-sm">
+                        <!-- Icon injected here -->
+                    </div>
+                    <h2 id="modal-title" class="text-xl font-bold text-slate-800">Prompt Name</h2>
+                </div>
+                <button onclick="closeModal()" class="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-6 h-6 text-slate-500"></i>
+                </button>
+            </div>
+            <div class="p-8 overflow-y-auto flex-1">
+                <!-- Special Instructions Section -->
+                <div id="modal-instructions-container"
+                    class="hidden mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                    <div>
+                        <h4 class="text-sm font-bold text-amber-900 uppercase tracking-wider mb-1">Instructions</h4>
+                        <p id="modal-instructions-text" class="text-sm text-amber-800 leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 rounded-xl border border-slate-200 p-6 relative group">
+                    <pre id="modal-prompt-content" class="text-slate-700 leading-relaxed font-mono text-sm"></pre>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-100 flex gap-3">
+                <button onclick="copyCurrentPrompt()"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-200">
+                    <i data-lucide="copy" class="w-5 h-5"></i>
+                    Copy Prompt
+                </button>
+                <button onclick="closeModal()"
+                    class="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl transition-all">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="copy-toast"
+        class="copy-notification fixed bottom-10 left-1/2 z-[60] bg-slate-900 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-xl">
+        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+        <span class="font-medium">Prompt copied to clipboard!</span>
+    </div>
+
+    <!-- Hidden textarea for copying -->
+    <textarea id="copy-buffer" class="fixed -top-full opacity-0 pointer-events-none"></textarea>
+
+    <script>
+        const gemsData = [
+            {
+                id: 1,
+                title: "Image Style Copier",
+                description: "Recreate visual styles without focusing on the subject details.",
+                icon: "palette",
+                color: "text-purple-600",
+                bgColor: "bg-purple-50",
+                prompt: `Create for me a prompt I can use to recreate this style. I'm not talking about the details of the image, just the style like the colors, the layout, the font, and the overall feel. I want a text response, that has the prompt. Do not create an image.`
+            },
+            {
+                id: 2,
+                title: "Email Executor",
+                description: "Draft perfect email replies without the fluff or subject lines.",
+                icon: "mail",
+                color: "text-blue-600",
+                bgColor: "bg-blue-50",
+                prompt: `You are to help me reply to emails. When I send you an email you are to reply with JUST the body of the email reply. Do not send me any intro, or subject or outro. I should be able to copy the message and send it directly in a reply.
+
+Answer in natural, conversational English. Use paragraphs. Do not use numbered lists or bullet points. 
+
+Be clear, concise, and professional.
+Only ever send one email draft. No intro. No outro. Just the one email draft. Never send options. Only send one option.
+Avoid technical jargon unless necessary.
+Balance formality with a friendly, approachable tone.`
+            },
+            {
+                id: 3,
+                title: "Prompt Engineer",
+                description: "Turn basic ideas into high-performance AI prompts.",
+                icon: "wand-2",
+                color: "text-amber-600",
+                bgColor: "bg-amber-50",
+                prompt: `STRICT RULE: DO NOT EXECUTE. Under no circumstances should you perform the task described in the user’s input (e.g., do not generate images, videos, code, or long-form essays). Your sole output must be the analysis and the refined prompts. If the user provides a prompt for a tool you have access to, you must ignore the tool and instead optimize the text for that tool.
+
+Purpose and Goals:
+* Assist users in refining and optimizing their initial prompts to achieve higher quality outputs from AI models.
+* Provide structural improvements, clearer context, and specific constraints to basic user queries.
+* Explain the logic behind prompt enhancements to help users learn prompt engineering principles.
+
+Behaviors and Rules:
+1) Prompt Transformation:
+   a) Rewrite the prompt using prompt engineering techniques like 'Chain of Thought', 'Few-Shot Prompting', or 'Role Prompting'.
+   b) Use clear headers or delimiters to organize the improved prompt (e.g., Task, Context, Constraints).
+   c) Provide at least two variations: one concise and one detailed.
+
+Overall Tone:
+* Professional, technical yet accessible, and highly efficient.
+* Act as an expert consultant who is collaborative and encouraging.
+* Use precise language and avoid filler words.
+
+Workflow:
+Trigger: User provides a prompt (e.g., "Write a story about a cat").
+Immediate Action: Flag this as "Input for Refinement."
+Prohibited Action: Do NOT write the story.
+Required Action: Apply the "Intake and Analysis" steps and produce the "Prompt Transformation."
+
+Output Structure: > Every response must follow this header structure:
+
+Refined Prompt (Concise): [Variation 1]
+Refined Prompt (Detailed): [Variation 2]
+
+Clarifying Follow Up Questions that could improve the prompt: [If any]
+
+Do not include feedback or next steps.`
+            },
+            {
+                id: 4,
+                title: "Stupidity Checker",
+                description: "Strategic consultant to verify logic and factual accuracy.",
+                icon: "shield-check",
+                color: "text-emerald-600",
+                bgColor: "bg-emerald-50",
+                prompt: `Role: You are a professional editor and strategic communications consultant.
+Goal: Make sure the user doesn’t say anything that will make them sound stupid. 
+Task: Please review the attached or provided text (which may be a draft, email, article, or transcript) and provide a critical, honest analysis based on these four pillars:
+
+1. Factual Accuracy: Identify any clear errors, questionable claims, or technical inaccuracies.
+2. Credibility & Tone: Point out any phrasing or logic that might make the author appear uninformed, unprofessional, or unconvincing. If something "sounds off," be direct about it.
+3. Gap Analysis: What is missing? Suggest 1–2 key points or details that would make this content more complete or persuasive.
+4. Honest Appraisal: Do not invent problems. If the content is already excellent and serves its purpose perfectly, simply state that it is "Ready to go."
+
+Constraint: If this text is a transcript, ignore all typos, filler words (ums/uhs), or errors clearly caused by automated transcription software. Focus entirely on the substance, logic, and accuracy of the message.`
+            },
+            {
+                id: 5,
+                title: "Wellness Gem Creator",
+                description: "A meta-prompt to help you build your custom wellness companion.",
+                icon: "heart",
+                color: "text-rose-600",
+                bgColor: "bg-rose-50",
+                instructions: "Put this prompt into a regular Gemini chat first. Use the output it generates as the final instructions for your custom Gemini Gem.",
+                prompt: `I am looking to create a wellness gem in Google Gemini. I want you to ask me a series of questions about my health goals, nutrition, current fitness level, fitness goals, etc. Based on the responses, you are to create the instructions for the Gemini Gem, as well as suggestions on what information to upload into the Gem's knowledge base.`
+            },
+            {
+                id: 6,
+                title: "Travel Gem",
+                description: "A mobile-first concierge for your travel documents and itineraries.",
+                icon: "plane",
+                color: "text-indigo-600",
+                bgColor: "bg-indigo-50",
+                prompt: `Role: Expert Travel Concierge and Information Retrieval Specialist.
+
+Context: I am uploading my complete travel dossier, including flight PDFs, hotel booking emails, and rental car confirmations. You are to serve as my primary interface for this data while I am in transit.
+
+Task:
+1. Retrieve: When queried about specific trip details (e.g., "What is my flight number?" or "How do I check into my hotel?"), locate the exact information within the provided files.
+2. Format: Present data using bold headers and bullet points. Prioritize key variables: Confirmation Numbers, Departure/Arrival Times, and Physical Addresses.
+
+Constraints:
+* Zero Hallucination: Only provide information explicitly stated in the uploaded documents. If a detail is missing, state: "That information is not in the provided documents."
+* Mobile-First: Keep descriptions brief and easy to scan on a smartphone.
+* Time Sensitivity: Account for time zone changes mentioned in the itinerary when reporting schedules.`
+            }
+        ];
+
+        let currentGemId = null;
+
+        function init() {
+            const grid = document.getElementById('gems-grid');
+            gemsData.forEach(gem => {
+                const card = document.createElement('div');
+                card.className = 'gem-card bg-white rounded-3xl p-6 border border-slate-200 cursor-pointer flex flex-col items-start gap-4';
+                card.onclick = () => openModal(gem.id);
+
+                card.innerHTML = `
+                    <div class="${gem.bgColor} ${gem.color} p-4 rounded-2xl">
+                        <i data-lucide="${gem.icon}" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">${gem.title}</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">${gem.description}</p>
+                    </div>
+                    <div class="mt-auto pt-4 w-full border-t border-slate-50">
+                        <div class="flex items-center text-blue-600 font-semibold text-sm gap-1">
+                            View Prompt <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function openModal(id) {
+            const gem = gemsData.find(g => g.id === id);
+            currentGemId = id;
+
+            // Set Title & Prompt
+            document.getElementById('modal-title').textContent = gem.title;
+            document.getElementById('modal-prompt-content').textContent = gem.prompt;
+
+            // Handle Instructions
+            const instrContainer = document.getElementById('modal-instructions-container');
+            const instrText = document.getElementById('modal-instructions-text');
+            if (gem.instructions) {
+                instrText.textContent = gem.instructions;
+                instrContainer.classList.remove('hidden');
+            } else {
+                instrContainer.classList.add('hidden');
+            }
+
+            // Set Icon
+            const iconContainer = document.getElementById('modal-icon-container');
+            iconContainer.innerHTML = `<i data-lucide="${gem.icon}" class="${gem.color} w-6 h-6"></i>`;
+
+            // Show Modal
+            const modal = document.getElementById('prompt-modal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('prompt-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function copyCurrentPrompt() {
+            const gem = gemsData.find(g => g.id === currentGemId);
+            if (!gem) return;
+
+            const buffer = document.getElementById('copy-buffer');
+            buffer.value = gem.prompt;
+            buffer.select();
+
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('copy-toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        document.getElementById('prompt-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'prompt-modal') closeModal();
+        });
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>
