@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Claude Cowork — Use Cases</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      color: white;
+      padding: 48px 24px 40px;
+      text-align: center;
+    }
+
+    header .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #7eb8f7;
+      margin-bottom: 12px;
+    }
+
+    header h1 {
+      font-size: clamp(26px, 5vw, 40px);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    header h1 span { color: #7eb8f7; }
+
+    header p {
+      font-size: 16px;
+      color: #b0bdd6;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Sponsor Banner ── */
+    .sponsor-banner {
+      background: #fff8e7;
+      border-bottom: 1px solid #f0d98c;
+      padding: 14px 24px;
+      text-align: center;
+      font-size: 14px;
+      color: #5a4500;
+    }
+
+    .sponsor-banner a {
+      color: #c07800;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .sponsor-banner a:hover { text-decoration: underline; }
+
+    /* ── Grid ── */
+    .grid-wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #7a8bb0;
+      margin-bottom: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 24px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--accent, #7eb8f7);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .card:hover {
+      border-color: var(--accent, #7eb8f7);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      background: var(--icon-bg, #eef4ff);
+    }
+
+    .card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #1a1a2e;
+    }
+
+    .card p {
+      font-size: 13.5px;
+      color: #6b7a99;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent, #7eb8f7);
+      background: var(--tag-bg, #eef4ff);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .copy-hint {
+      font-size: 12px;
+      color: #b0bac9;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .copy-hint svg { width: 13px; height: 13px; opacity: 0.6; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 14, 30, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 20px;
+      max-width: 780px;
+      width: 100%;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+      overflow: hidden;
+      animation: popIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid #eef0f5;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fafbfd;
+    }
+
+    .modal-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .modal-header-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .modal-header h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .modal-header .modal-subtitle {
+      font-size: 13px;
+      color: #8a94ad;
+      margin-top: 2px;
+    }
+
+    .modal-close {
+      background: #f0f2f5;
+      border: none;
+      cursor: pointer;
+      color: #6b7a99;
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+      transition: background 0.15s;
+    }
+
+    .modal-close:hover { background: #e2e6ef; color: #1a1a2e; }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 20px 24px;
+      flex: 1;
+    }
+
+    .prompt-box {
+      background: #f7f9fc;
+      border: 1.5px solid #e4e8f0;
+      border-radius: 12px;
+      padding: 18px 20px;
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.75;
+      color: #2d3452;
+      white-space: pre-wrap;
+      word-break: break-word;
+      user-select: text;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #eef0f5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fafbfd;
+    }
+
+    .modal-footer .tip {
+      font-size: 12.5px;
+      color: #9aa3bc;
+    }
+
+    .btn-copy {
+      background: #1a1a2e;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-copy:hover { background: #0f3460; }
+    .btn-copy.copied { background: #16a34a; }
+    .btn-copy svg { width: 15px; height: 15px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12.5px;
+      color: #9aa3bc;
+    }
+
+    footer a { color: #7eb8f7; text-decoration: none; }
+
+    /* ── Scrollbar ── */
+    .modal-body::-webkit-scrollbar { width: 6px; }
+    .modal-body::-webkit-scrollbar-track { background: transparent; }
+    .modal-body::-webkit-scrollbar-thumb { background: #d0d6e4; border-radius: 3px; }
+
+    @media (max-width: 480px) {
+      .modal-footer { flex-direction: column; align-items: stretch; }
+      .btn-copy { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="label">Paul J Lipsky · Claude Cowork</div>
+  <h1>Cowork <span>Use Cases</span></h1>
+  <p>Click any use case below to see the prompt. Hit copy, paste it into Claude Cowork, and you're off.</p>
+</header>
+
+<!-- Sponsor Banner -->
+<div class="sponsor-banner">
+  🔒 <strong>Sponsor:</strong> Try Privacy for free —
+  <a href="https://privacy.com/paul" target="_blank">privacy.com/paul</a>
+  &nbsp;·&nbsp; Get a <strong>$5 sign-up bonus</strong> on your first purchase!
+</div>
+
+<!-- Use Case Grid -->
+<div class="grid-wrapper">
+  <div class="section-title">Prompts &amp; Use Cases</div>
+  <div class="grid">
+
+    <!-- Card 1: Morning Report -->
+    <div class="card" style="--accent:#7eb8f7;--icon-bg:#eef4ff;--tag-bg:#eef4ff;" onclick="openModal('morning')">
+      <div class="card-icon">🌅</div>
+      <h2>Build My Morning Report</h2>
+      <p>Set up a personalized daily briefing system. Claude interviews you, then generates reusable instructions to deliver a fresh HTML report every morning.</p>
+      <div class="card-footer">
+        <span class="tag">Setup Prompt</span>
+        <span class="copy-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Click to copy
+        </span>
+      </div>
+    </div>
+
+    <!-- Card 2: iMessage Tasks -->
+    <div class="card" style="--accent:#a78bfa;--icon-bg:#f3f0ff;--tag-bg:#f3f0ff;" onclick="openModal('imessage')">
+      <div class="card-icon">💬</div>
+      <h2>iMessage Task Setup</h2>
+      <p>Turn iMessage into a command line for Claude. Send yourself tasks or screenshots and have Claude act on them automatically on a schedule.</p>
+      <div class="card-footer">
+        <span class="tag" style="color:#a78bfa;background:#f3f0ff;">Setup Prompt</span>
+        <span class="copy-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Click to copy
+        </span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  From the <a href="https://www.youtube.com/@PaulJLipsky" target="_blank">Paul J Lipsky</a> YouTube channel &nbsp;·&nbsp; <a href="https://privacy.com/paul" target="_blank">🔒 Try Privacy free</a>
+</footer>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-header-icon" id="modal-icon"></div>
+        <div>
+          <h3 id="modal-title"></h3>
+          <div class="modal-subtitle" id="modal-subtitle"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" title="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="prompt-box" id="modal-content"></div>
+    </div>
+    <div class="modal-footer">
+      <span class="tip">Paste this directly into Claude Cowork to get started.</span>
+      <button class="btn-copy" id="copy-btn" onclick="copyPrompt()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Prompt
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const prompts = {
+  morning: {
+    title: "Build My Morning Report",
+    subtitle: "Interview-based setup — generates reusable daily report instructions",
+    icon: "🌅",
+    iconBg: "#eef4ff",
+    text: `You are going to help me build a personalized daily morning report system. Your job right now is to interview me with a short set of questions so you understand exactly what I need. Once I've answered, you'll generate a complete set of instructions I can save and reuse — so that every morning, I can paste those instructions into Claude and get a fresh, polished report delivered as an HTML file.
+
+Before you ask anything, explain to me in one or two sentences what we're building together, so I know what to expect.
+
+Then ask me the following questions one at a time, waiting for my answer before moving on. Don't number them out loud or make it feel like a form — keep the tone friendly and conversational.
+
+---
+
+Questions to ask me (in this order):
+
+1. What do you do for work, and what's your role? (This helps tailor the report to what actually matters to you.)
+
+2. What topics, industries, or subjects do you need to stay on top of daily? For example: a specific industry, competitors, technology trends, news in your field, etc. Give me as many as you want.
+
+3. Are there any specific websites, newsletters, publications, or sources you trust that you'd like me to check every day?
+
+4. Would you like me to check your email inbox each morning and surface anything important — like action items, things that need a reply, or anything time-sensitive? (Yes / No / Not sure yet)
+
+5. Would you like me to check your calendar and give you a quick overview of what's on your plate for the day? (Yes / No / Not sure yet)
+
+6. How deep do you want the news coverage?
+   - Quick scan — just the headlines and why they matter, fast to read
+   - Full briefing — more detail, context, and suggested actions or talking points
+
+7. Is there anything you specifically do NOT want included? For example: politics, sports, celebrity news, a competitor you'd rather not track, etc.
+
+8. What should I call this report? (e.g. "My Morning Brief", "Daily Startup Digest", "Sarah's Daily Catch-Up" — or I can suggest something based on your answers)
+
+---
+
+Once I've answered all eight questions, do the following:
+
+A. Confirm back to me what you understood in a short paragraph — what my role is, what topics I care about, which sources to check, and whether email/calendar are included. Ask me to confirm or correct anything before you proceed.
+
+B. After I confirm, generate a complete, self-contained set of instructions I can save and reuse. Format them clearly so I can copy them and paste them into a new Claude session any morning. The instructions should tell Claude to:
+
+1. Run targeted web searches for each of my topics, using date filters so only content from the past 24–48 hours is surfaced. If a search returns nothing fresh, it should say "no new developments" rather than pulling in older filler content.
+
+2. Check any trusted sources I listed, pulling only items published in the last 48 hours.
+
+3. (If I said yes to email) Scan my Gmail inbox and surface: unread messages that need a reply, anything flagged or starred, any time-sensitive items. Summarize each in one line.
+
+4. (If I said yes to calendar) Check my Google Calendar for today and tomorrow. List meetings/events with times and any prep I might need.
+
+5. Merge and filter all findings. Apply a strict freshness rule: nothing older than 48 hours goes in the top sections. Older items get moved to a "background" section at the bottom, collapsed by default. Remove duplicates — if the same story appeared yesterday, only surface it again if something materially new happened today.
+
+6. Organize the report into sections:
+   - Section A — Top Stories (up to 3 items): The most important, confirmed-fresh developments. For each: what happened, why it matters to me specifically, and any suggested action or talking point.
+   - Section B — On My Radar (3–7 items): Noteworthy but not urgent. One line each with a link.
+   - Section C — Trends to Watch (2–4 items): Emerging signals or patterns worth tracking, even if nothing broke today.
+   - Section D — Ideas & Opportunities (optional, up to 3): Based on what's in the news, anything actionable I might want to do — a topic to write about, a conversation to have, a move to consider.
+   - Section E — Email Summary (only if email is enabled): Flagged inbox items, each summarized in one line.
+   - Section F — Today's Calendar (only if calendar is enabled): Today and tomorrow's schedule with any prep notes.
+   - Section G — Background / Already Covered (collapsed by default): Items that are older than 48 hours or already appeared in a recent report.
+
+7. Produce a polished HTML file saved to my workspace. Style guidelines:
+   - White background, clean sans-serif font, dark readable text
+   - Header bar in deep navy with the report name and today's date
+   - Each section has its own accent color
+   - Section A items are displayed as cards with a subtle shadow
+   - Section G is collapsed by default using a <details> tag
+   - Mobile-friendly, max-width 860px, centered
+   - All links open in a new tab
+
+8. Maintain a dedup log in a JSON file in the workspace. Each time an item is reported, log it with today's date. On future runs, if an item was already reported in the last 7 days and nothing new has happened, suppress it and move it to Section G instead.
+
+9. End with a status line confirming what ran:
+   ✅ Report saved: [filename]
+   ✅ Web searches: [N queries run]
+   ✅ Email: [checked / skipped]
+   ✅ Calendar: [checked / skipped]
+   ✅ Dedup log: [N items tracked]
+
+---
+
+Tone and style rules to embed in the instructions:
+- Write for me, not for a general audience. Use my name if I gave it.
+- Keep Section A tight — if something doesn't directly affect my work or interests, cut it.
+- Never pad the report with filler. "No major developments today" is a valid and honest result.
+- Treat the freshness rule as non-negotiable. Old news presented as new news is worse than no news.
+- The whole report should take under 5 minutes to read.
+
+---
+
+Once the instructions are generated, tell me: "Save these instructions somewhere you can paste them into Claude each morning — or set up a scheduled task to run them automatically."`
+  },
+
+  imessage: {
+    title: "iMessage Task Setup",
+    subtitle: "Turn iMessage into a command line for Claude Cowork",
+    icon: "💬",
+    iconBg: "#f3f0ff",
+    text: `I want to set up an iMessage-based task system for Claude Cowork. Here's how it works: I'll send myself iMessages — either text tasks or images/screenshots — and Claude will check my messages on a schedule, read anything new from me, and act on those tasks automatically.
+
+Before setting this up, I need you to interview me so you can configure the system correctly. Please ask me these questions one at a time and wait for my answer before moving on:
+
+1. What is your phone number or Apple ID (the account you'll be sending iMessages from)? This is required so the system only processes messages from you and ignores messages from anyone else.
+
+2. How often do you want Claude to check for new messages? (Options: every 30 minutes, every hour, every 2 hours, or a custom interval.)
+
+3. Will you be sending images or screenshots along with your messages, or just text?
+
+   [If yes to images, continue to questions 4–6. If no, skip to question 7.]
+
+4. When you send a screenshot or image, what do you generally want done with it? For example:
+   - Analyze it and take action based on what's in it
+   - Save it to a specific folder with a note
+   - Extract text from it and add to a document
+   - Something else (describe it)
+
+5. Is there a default folder where you'd like images or screenshots saved?
+
+6. Should Claude try to describe what it sees in the image and log that description somewhere, like a text file or Notion page?
+
+7. For text-based task messages — do you want Claude to execute those tasks immediately when it finds them, or collect them and ask you for confirmation first?
+
+8. Are there any specific types of tasks you plan to send regularly? For example:
+   - Research requests
+   - Reminders or to-dos to add somewhere
+   - File organization tasks
+   - Draft emails or messages
+   - Content ideas for YouTube
+
+9. Should Claude notify you after it processes a batch of messages? If so, how — a message in a folder, a Slack message, or something else?
+
+10. Should Claude keep a log of everything it acted on, so you can review what was processed?
+
+Once I've answered all of these, use my answers to:
+- Create a scheduled task that runs on my chosen interval and checks for new iMessages from my phone number/Apple ID only
+- Build a clear set of handling instructions that tells Claude exactly what to do with text messages, and (if applicable) how to handle images using computer use to open iMessage, take a screenshot, and analyze the image
+- Save those handling instructions as a skill or instruction file in my Cowork folder so the scheduled task can reference them
+- Confirm everything is set up and show me a summary of how the system will work
+
+Let's get started — ask me question 1.`
+  }
+};
+
+let currentKey = null;
+
+function openModal(key) {
+  const data = prompts[key];
+  if (!data) return;
+  currentKey = key;
+
+  document.getElementById('modal-title').textContent = data.title;
+  document.getElementById('modal-subtitle').textContent = data.subtitle;
+  document.getElementById('modal-icon').textContent = data.icon;
+  document.getElementById('modal-icon').style.background = data.iconBg;
+  document.getElementById('modal-content').textContent = data.text;
+
+  const btn = document.getElementById('copy-btn');
+  btn.classList.remove('copied');
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Prompt`;
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentKey = null;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function copyPrompt() {
+  if (!currentKey) return;
+  navigator.clipboard.writeText(prompts[currentKey].text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Prompt`;
+    }, 2500);
+  });
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
